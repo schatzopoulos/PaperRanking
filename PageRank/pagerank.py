@@ -39,7 +39,7 @@ start_year = ""
 
 # Read filename as argument
 if(len(sys.argv) < 4):
-	print "Usage: python pagerank <filename> <alpha> <convergence_error>"
+	print "Usage: python2 pagerank <filename> <alpha> <convergence_error>"
 	print
 	sys.exit()
 else:
@@ -76,7 +76,7 @@ print
 # A. Initial step!
 
 # 1. Get dangling node pagerank sum - if a start year had been specified, we need only do this for dangling nodes
-dangling_sum = os.popen("cat " + filename + " | python pagerank_dangling.py " + str(node_count) + " " + str(start_year) + " | sort -k1,1 | python pagerank_dangling_reducer.py").read()
+dangling_sum = os.popen("cat " + filename + " | python2 pagerank_dangling.py " + str(node_count) + " " + str(start_year) + " | sort -k1,1 | python2 pagerank_dangling_reducer.py").read()
 # Convert dnagling_sum string to float
 dangling_sum = float(dangling_sum)
 
@@ -94,7 +94,7 @@ dangling_sum = float(dangling_sum)
 
 
 # 2. Execute pagerank step
-os.popen("cat " + filename + " | python pagerank_map.py " + start_year + " | sort -k1,1 | python pagerank_reducer.py " + str(alpha) + " " + str(dangling_sum) + " " + str(node_count) + " > graphstep.txt")
+os.popen("cat " + filename + " | python2 pagerank_map.py " + start_year + " | sort -k1,1 | python2 pagerank_reducer.py " + str(alpha) + " " + str(dangling_sum) + " " + str(node_count) + " > graphstep.txt")
 
 # ------------------------- #
 # -- HADOOP LIKE COMMAND -- #
@@ -106,7 +106,7 @@ os.popen("cat " + filename + " | python pagerank_map.py " + start_year + " | sor
 # ------------------------- #
 
 # 3. Calculate Error
-delta = os.popen("cat graphstep.txt | python map_error.py | python reduce_error.py").read()
+delta = os.popen("cat graphstep.txt | python2 map_error.py | python2 reduce_error.py").read()
 # Convert error string to Float
 delta = float(delta)
 
@@ -132,7 +132,7 @@ print "Iteration " + str(iterations) + " - Max error: ", delta
 while(delta >= convergence_error):
 	
 	# 1. Get dangling node pagerank sum
-	dangling_sum = os.popen("cat graphstep.txt | python pagerank_dangling.py " + str(node_count) + " " + str(start_year) + " | sort -k1,1 | python pagerank_dangling_reducer.py").read()
+	dangling_sum = os.popen("cat graphstep.txt | python2 pagerank_dangling.py " + str(node_count) + " " + str(start_year) + " | sort -k1,1 | python2 pagerank_dangling_reducer.py").read()
 	# Convert dnagling_sum string to float
 	dangling_sum = float(dangling_sum)
 
@@ -151,7 +151,7 @@ while(delta >= convergence_error):
 	# ------------------------- #
 
 	# 2. Execute pagerank step
-	os.popen("cat graphstep.txt | python pagerank_map.py | sort -k1,1 | python pagerank_reducer.py " + str(alpha) + " " + str(dangling_sum) + " " + str(node_count) + " > nextstep.txt")
+	os.popen("cat graphstep.txt | python2 pagerank_map.py | sort -k1,1 | python2 pagerank_reducer.py " + str(alpha) + " " + str(dangling_sum) + " " + str(node_count) + " > nextstep.txt")
 
 	# ------------------------- #
 	# -- HADOOP LIKE COMMAND -- #
@@ -165,7 +165,7 @@ while(delta >= convergence_error):
 	# ------------------------- #
 
 	# 3. Calculate Error
-	delta = os.popen("cat nextstep.txt | python map_error.py | python reduce_error.py").read()
+	delta = os.popen("cat nextstep.txt | python2 map_error.py | python2 reduce_error.py").read()
 	# Convert error string to Float
 	delta = float(delta)
 
@@ -207,7 +207,7 @@ print "Total iterations: ", iterations
 # Normalize scores!
 
 # Sum the scores of all papers
-pagerank_sum = os.popen("cat graphstep.txt | python sum_pr_map.py |  python sum_pr_reduce.py ").read()
+pagerank_sum = os.popen("cat graphstep.txt | python2 sum_pr_map.py |  python2 sum_pr_reduce.py ").read()
 pagerank_sum = float(pagerank_sum)
 normalise_val = 1/pagerank_sum
 
@@ -224,9 +224,9 @@ normalise_val = 1/pagerank_sum
 # ------------------------- #
 
 # Calculate normalised PageRank scores
-os.popen("cat graphstep.txt | python normalise_pr_map.py " + str(normalise_val) + " > nextstep.txt")	
+os.popen("cat graphstep.txt | python2 normalise_pr_map.py " + str(normalise_val) + " > nextstep.txt")
 # Sort final results based on the pagerank scores and output results into final file
-os.popen("cat nextstep.txt | sort -g -r -k3 > final_pagerank_" + start_year + filename.replace(".txt", "") + "_" + str(alpha) + "_" + str(convergence_error) + ".txt")
+os.popen("cat nextstep.txt | sort -g -r -k3 > final_pagerank.txt")
 
 # ------------------------- #
 # -- HADOOP LIKE COMMAND -- #
